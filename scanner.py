@@ -21,49 +21,48 @@ class Scanner:
 
         if self.ch.isalpha():
             text = ''
-            while (not self.ch.isspace()) and self.ch.isalnum():
+            while (not self.ch.isspace()) and self.ch.isalpha():
                 text = text + self.ch
                 self.get_char()
             if text in self.reserved.keys():
-                self.token.type = self.reserved[text]
+                self.token.ttype = self.reserved[text]
             else:
-                self.token.type = Tokens.TOK_ID
-                self.token.lexem = text
+                self.token.ttype = Tokens.TOK_LETTER
+                self.token.lexeme = text
         elif self.ch.isdigit():
             num = 0
             while self.ch.isdigit():
                 num = num * 10 + int(self.ch)
                 self.get_char()
-            self.token.type = Tokens.TOK_DIGIT
+            self.token.ttype = Tokens.TOK_DIGIT
             self.token.value = num
         elif self.ch == '=':
-            self.token.type = Tokens.TOK_EQUALS
+            self.token.ttype = Tokens.TOK_EQUALS
             self.get_char()
         elif self.ch == '(':
-            self.token.type = Tokens.TOK_LPAREN
+            self.token.ttype = Tokens.TOK_LPAREN
             self.get_char()
         elif self.ch == ')':
-            self.token.type = Tokens.TOK_RPAREN
+            self.token.ttype = Tokens.TOK_RPAREN
             self.get_char()
         elif self.ch == '{':
-            self.token.type = Tokens.TOK_LBRACE
+            self.token.ttype = Tokens.TOK_LBRACE
             self.get_char()
         elif self.ch == '}':
-            self.token.type = Tokens.TOK_RBRACE
+            self.token.ttype = Tokens.TOK_RBRACE
             self.get_char()
         elif self.ch == ',':
-            self.token.type = Tokens.TOK_COMMA
+            self.token.ttype = Tokens.TOK_COMMA
             self.get_char()
         elif self.ch == '-':
             self.get_char()
             if self.ch == '>':
-                self.token.type = Tokens.TOK_TRANSITION
+                self.token.ttype = Tokens.TOK_TRANSITION
             self.get_char()
         elif self.ch == '':
-            self.token.type = Tokens.TOK_EOF
+            self.token.ttype = Tokens.TOK_EOF
         else:
-            pass
-            #TODO illegal character, throw exception
+            raise Exception('ScannerError', 'Illegal character encountered.')
         return self.token
 
 if __name__ == '__main__':
