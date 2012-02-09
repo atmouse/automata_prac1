@@ -4,10 +4,6 @@ from scanner import *
 from tokens import *
 import sys
 
-global scanner
-global token
-global all_states
-
 class ParseError(Exception):
     def __init__(self, value, line_num):
         self.value = value
@@ -16,106 +12,215 @@ class ParseError(Exception):
         return self.value + ' in line ' + self.line_num + '.'
 
 def automaton():
+    global token
     token = scanner.get_token()
     if token.ttype == Tokens.TOK_DFA:
         if scanner.get_token().ttype == Tokens.TOK_EQUALS:
             if scanner.get_token().ttype == Tokens.TOK_LPAREN:
-                states()
+                pass
             else:
                 raise ParseError('Expected a "("', str(scanner.get_line_num()))
+            states()
+            if token.ttype == Tokens.TOK_COMMA:
+                pass
+            else:
+                raise ParseError('Expected a ","', str(scanner.get_line_num()))
+            alphabet()
+            if token.ttype == Tokens.TOK_COMMA:
+                pass
+            else:
+                raise ParseError('Expected a ","', str(scanner.get_line_num()))
+            tfunction()
+            if token.ttype == Tokens.TOK_COMMA:
+                pass
+            else:
+                raise ParseError('Expected a ","', str(scanner.get_line_num()))
+            start()
+            if token.ttype == Tokens.TOK_COMMA:
+                pass
+            else:
+                raise ParseError('Expected a ","', str(scanner.get_line_num()))
+            accept()
+            if token.ttype == Tokens.TOK_RPAREN:
+                print 'parsing successful'
+                scanner.close_file()
+            else:
+                raise ParseError('Expected a ")"', str(scanner.get_line_num()))
+            
         else:
             raise ParseError('Expected a "="', str(scanner.get_line_num()))
     else:
         raise ParseError('Type of FA not specified, or incorrectly specified', str(scanner.get_line_num()))
 
 def states():
-    idset()
+    idset(add_state)
+
+def add_alpha(sym):
+    if not (sym in alphabet_symbols):
+        alphabet_symbols.append(sym)
+    else:
+        raise ParseError('Symbol ' + sym + ' already added', str(scanner.get_line_num()))
 
 def alphabet():
-    pass
+    global token
 
-def tfunction():
-    pass
-
-def map():
-    pass
-
-def accept():
-    pass
-
-def idset():
     if scanner.get_token().ttype == Tokens.TOK_LBRACE:
-        id()
+        sym = symbol()
+        add_alpha(sym)
     else:
         raise ParseError('Expected a "{"', str(scanner.get_line_num()))
 
-    print token.ttype
-    print 'the while'
-    #check for zero or more ', id'
+    #check for zero or more ', symbol'
     while token.ttype == Tokens.TOK_COMMA:
-        print 'inside the while'
-        id()
-
-    #print token_names[token.ttype]
+        sym = symbol()
+        add_alpha(sym)
 
     if token.ttype == Tokens.TOK_RBRACE:
         scanner.get_token()
+        return
+    else:
+        raise ParseError('Expected a "}"', str(scanner.get_line_num()))
+    
+def start():
+    global start_state
 
-        print token_names[token.ttype]
-        print all_states
-        sys.exit(0)
+    state = id()
+    if state in all_states:
+        start_state = state
+    return
 
+def tfunction():
+    global token
+
+    if scanner.get_token().ttype == Tokens.TOK_LBRACE:
+        map()
+    else:
+        raise ParseError('Expected a "{"', str(scanner.get_line_num()))
+
+    #check for zero or more ', symbol'
+    while token.ttype == Tokens.TOK_COMMA:
+        map()
+
+    if token.ttype == Tokens.TOK_RBRACE:
+        scanner.get_token()
+        return
+    else:
+        raise ParseError('Expected a "}"', str(scanner.get_line_num()))
+
+def map():
+    #TODO implement transition function
+    global token
+    
+    if scanner.get_token().ttype == Tokens.TOK_LPAREN:
+        id()
+
+        if token.ttype == Tokens.TOK_COMMA:
+            pass
+        else:
+            raise ParseError('Expected a ","', str(scanner.get_line_num()))
+
+        symbol()
+
+        if token.ttype == Tokens.TOK_RPAREN:
+            pass
+        else:
+            raise ParseError('Expected a ")"', str(scanner.get_line_num()))
+        
+    else:
+        raise ParseError('Expected a "("', str(scanner.get_line_num()))
+
+    if scanner.get_token().ttype == Tokens.TOK_TRANSITION:
+        id()
+    else:
+        raise ParseError('Expected a "->"', str(scanner.get_line_num()))
+
+def accept():
+    idset(add_accept_state)
+
+def add_state(state):
+    if not (state in all_states):
+        all_states.append(state)
+        return
+    else:
+        raise ParseError('State ' + state + ' already added', str(scanner.get_line_num()))
+
+def add_accept_state(state):
+    if not (state in accept_states):
+        accept_states.append(state)
+        return
+    else:
+        raise ParseError('State ' + state + ' already added', str(scanner.get_line_num())) 
+
+def idset(function):
+    global token
+    
+    if scanner.get_token().ttype == Tokens.TOK_LBRACE:
+        state = id()
+        function(state)
+    else:
+        raise ParseError('Expected a "{"', str(scanner.get_line_num()))
+
+    #check for zero or more ', id'
+    while token.ttype == Tokens.TOK_COMMA:
+        state = id()
+        function(state)
+
+    if token.ttype == Tokens.TOK_RBRACE:
+        scanner.get_token()
         return
     else:
         raise ParseError('Expected a "}"', str(scanner.get_line_num()))
 
 
 def id():
+    global token
+
     token = scanner.get_token()
     if token.ttype == Tokens.TOK_LETTER:
         text = ''
         while (token.ttype == Tokens.TOK_LETTER or token.ttype == Tokens.TOK_DIGIT):
             if token.ttype == Tokens.TOK_LETTER:
-                #print token.lexeme
                 text = text + token.lexeme
             if token.ttype == Tokens.TOK_DIGIT:
-                #print str(token.value)
                 text = text + str(token.value)
             token = scanner.get_token()
-            #if token.ttype == Tokens.TOK_COMMA:
-                #print 'fdfdfd'
-        #print token.lexeme
-        #print text
-        #print 'id() ' + token_names[token.ttype]
-        #sys.exit(0)
+        '''
         if not (text in all_states):
             all_states.append(text)
-            print 'PARSER: appended ' +text
-            print 'PARSER, id(): ' + token_names[token.ttype]
             return
         else:
             raise ParseError('State ' + text + ' already added', str(scanner.get_line_num()))
+        '''
+        return text
     else:
         raise ParseError('Expected a letter', str(scanner.get_line_num()))
-
+    
 def symbol():
-    pass
+    global token
 
-def scan_file(input_file):
-    scanner = Scanner(input_file)
-    token = Token()
     token = scanner.get_token()
-    automaton()
-    #if token.ttype == Tokens.TOK_DFA:
-    #    parse_dfa(scanner)
-    #else:
-    #    #TODO throw an exception?
-    #    print '\nParserError. Type of FA not specified, or incorrectly specified.\n'
-    #    sys.exit(1)
+    if token.ttype == Tokens.TOK_DIGIT:
+        num = token.value
+        token = scanner.get_token()
+        return num
+    elif token.ttype == Tokens.TOK_LETTER:
+        text = token.lexeme
+        token = scanner.get_token()
+        return text
+    else:
+        raise ParseError('Expected a letter or a digit', str(scanner.get_line_num()))
 
 if __name__ == '__main__':
-    #scan_file('test1.txt')
+    global accept_states
+    global start_state
+    global all_states
+    global alphabet_symbols
+    global scanner
+    global token
+    accept_states = []
+    start_state = ''
     all_states = []
+    alphabet_symbols = []
     scanner = Scanner('test1.txt')
     token = Token()
     automaton()

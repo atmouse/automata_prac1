@@ -16,10 +16,13 @@ class Scanner:
         if self.ch == '\n':
             self.line_num = self.line_num + 1
         self.ch = self.src_file.read(1) #read one character
-        print 'SCANNER_READ: ' + self.ch + '\n'
+        #print 'SCANNER_READ: ' + self.ch + '\n'
 
     def get_line_num(self):
         return self.line_num
+
+    def close_file(self):
+        self.src_file.close()
 
     def get_token(self):
         
@@ -70,9 +73,6 @@ class Scanner:
             self.token.ttype = Tokens.TOK_EOF
         else:
             raise Exception('ScannerError', 'Illegal character encountered.')
-
-        #while (self.ch.isspace()):
-        #    self.get_char()
 
         return self.token
 
