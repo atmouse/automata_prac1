@@ -10,9 +10,16 @@ class Scanner:
         self.reserved = {'DFA':Tokens.TOK_DFA}
         self.token = Token()
         self.get_char()
+        self.line_num = 1
         
     def get_char(self):
+        if self.ch == '\n':
+            self.line_num = self.line_num + 1
         self.ch = self.src_file.read(1) #read one character
+        print 'SCANNER_READ: ' + self.ch + '\n'
+
+    def get_line_num(self):
+        return self.line_num
 
     def get_token(self):
         
@@ -63,6 +70,10 @@ class Scanner:
             self.token.ttype = Tokens.TOK_EOF
         else:
             raise Exception('ScannerError', 'Illegal character encountered.')
+
+        #while (self.ch.isspace()):
+        #    self.get_char()
+
         return self.token
 
 if __name__ == '__main__':
