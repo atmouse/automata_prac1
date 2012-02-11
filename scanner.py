@@ -2,6 +2,13 @@
 
 from tokens import *
 
+class ScanError(Exception):
+    def __init__(self, value, line_num):
+        self.value = value
+        self.line_num = line_num
+    def __str__(self):
+        return self.value + ' in line ' + self.line_num + '.'
+
 class Scanner:
     
     def __init__(self, input_file):
@@ -72,7 +79,7 @@ class Scanner:
         elif self.ch == '':
             self.token.ttype = Tokens.TOK_EOF
         else:
-            raise Exception('ScannerError', 'Illegal character encountered.')
+            raise ScanError('Illegal character encountered', str(self.get_line_num()))
 
         return self.token
 
