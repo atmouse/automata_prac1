@@ -132,7 +132,10 @@ def map():
     if scanner.get_token().ttype == Tokens.TOK_LPAREN:
         src_state = id()
 
-        src_state_index  = all_states[src_state]
+        try:
+            src_state_index  = all_states[src_state]
+        except KeyError:
+            raise ParseError('Specified state is unknown', str(scanner.get_line_num()))
 
         if token.ttype == Tokens.TOK_COMMA:
             pass
@@ -141,7 +144,10 @@ def map():
 
         sym = symbol()
 
-        symbol_index = alphabet_symbols[sym]
+        try:
+            symbol_index = alphabet_symbols[sym]
+        except KeyError:
+            raise ParseError('Specified symbol not in alphabet', str(scanner.get_line_num()))
 
         if token.ttype == Tokens.TOK_RPAREN:
             pass
@@ -154,7 +160,10 @@ def map():
     if scanner.get_token().ttype == Tokens.TOK_TRANSITION:
         dst_state = id()
 
-        dst_state_index = all_states[dst_state]
+        try:
+            dst_state_index = all_states[dst_state]
+        except KeyError:
+            raise ParseError('Specified state is unknown', str(scanner.get_line_num()))
     else:
         raise ParseError('Expected a "->"', str(scanner.get_line_num()))
 
