@@ -1,1 +1,1 @@
-usage: dfa_simulator.py <filename> <input string>
+usage: ./dfa_simulator.py <filename> <input string>
