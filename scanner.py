@@ -1,4 +1,21 @@
-#!/usr/bin/env python
+'''
+    Author: 
+        Arne Esterhuizen
+        15367940
+        arne.esterhuizen@gmail.com
+
+    Description:
+        A scanner class which reads in characters from a text file one
+        character at a time.
+        Returns a token object each time get_token() is called.
+        Token objects are defined in tokens.py.
+
+        To create a scanner and begin reading tokens, use the following code:
+            
+            scanner = Scanner(filename)
+            token = Token()
+            token = scanner.get_token()
+'''
 
 from tokens import *
 
@@ -20,19 +37,27 @@ class Scanner:
         self.line_num = 1
         
     def get_char(self):
+        '''
+            Return next character from input file.
+        '''
         if self.ch == '\n':
             self.line_num = self.line_num + 1
         self.ch = self.src_file.read(1) #read one character
         #print 'SCANNER_READ: ' + self.ch + '\n'
 
     def get_line_num(self):
+        '''
+            Return the current line number of the input file.
+        '''
         return self.line_num
 
     def close_file(self):
         self.src_file.close()
 
     def get_token(self):
-        
+        '''
+            Return the next token.
+        '''
         while (self.ch.isspace()):
             self.get_char()
 
@@ -82,6 +107,3 @@ class Scanner:
             raise ScanError('Illegal character encountered', str(self.get_line_num()))
 
         return self.token
-
-if __name__ == '__main__':
-    pass

@@ -1,5 +1,18 @@
 #!/usr/bin/env python
 
+'''
+    Author:
+        Arne Esterhuizen
+        15367940
+        arne.esterhuizen@gmail.com
+
+    Description:
+        A test program for scanner.py.
+
+    Usage:
+        python scanner.py
+'''
+
 from scanner import *
 from tokens import *
 
